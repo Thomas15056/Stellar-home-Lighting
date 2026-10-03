@@ -10,6 +10,37 @@
 
   if (year) year.textContent = new Date().getFullYear();
 
+  // Fixed campaign deadline so the timer is genuine rather than resetting per visitor.
+  // Update this date when you intentionally launch a new promotion.
+  const OFFER_END = new Date('2026-10-31T23:59:59-04:00');
+  const countdownEl = document.getElementById('promoCountdown');
+  const expiredEl = document.getElementById('promoExpired');
+  const countDays = document.getElementById('countDays');
+  const countHours = document.getElementById('countHours');
+  const countMinutes = document.getElementById('countMinutes');
+  const countSeconds = document.getElementById('countSeconds');
+
+  function updateCountdown() {
+    if (!countdownEl) return;
+    const remaining = OFFER_END.getTime() - Date.now();
+    if (remaining <= 0) {
+      document.querySelector('.countdown-clock')?.setAttribute('hidden', '');
+      if (expiredEl) expiredEl.hidden = false;
+      return;
+    }
+    const days = Math.floor(remaining / 86400000);
+    const hours = Math.floor((remaining % 86400000) / 3600000);
+    const minutes = Math.floor((remaining % 3600000) / 60000);
+    const seconds = Math.floor((remaining % 60000) / 1000);
+    if (countDays) countDays.textContent = String(days).padStart(2, '0');
+    if (countHours) countHours.textContent = String(hours).padStart(2, '0');
+    if (countMinutes) countMinutes.textContent = String(minutes).padStart(2, '0');
+    if (countSeconds) countSeconds.textContent = String(seconds).padStart(2, '0');
+  }
+
+  updateCountdown();
+  window.setInterval(updateCountdown, 1000);
+
   function showMessage(text, type = 'error') {
     message.textContent = text;
     message.className = `form-message ${type} show`;
@@ -97,7 +128,9 @@
       service: 'Permanent Outdoor Lighting',
       state_market: 'Florida',
       page_url: window.location.href,
-      submitted_at: new Date().toISOString()
+      submitted_at: new Date().toISOString(),
+      promotion: '10% Off Installation — Fall 2026',
+      promotion_expires: '2026-10-31T23:59:59-04:00'
     };
 
     submitBtn.disabled = true;

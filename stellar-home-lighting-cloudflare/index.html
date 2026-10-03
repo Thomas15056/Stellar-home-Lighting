@@ -60,6 +60,23 @@
 
         <aside class="quote-card" id="quote">
           <div class="quote-glow" aria-hidden="true"></div>
+          <div class="promo-countdown" id="promoCountdown" aria-live="polite">
+            <div class="promo-copy">
+              <span class="promo-badge">LIMITED FLORIDA OFFER</span>
+              <strong>10% OFF <em>installation</em></strong>
+              <small>New residential projects booked by Oct. 31, 2026</small>
+            </div>
+            <div class="countdown-clock" aria-label="Time remaining in 10 percent off promotion">
+              <div><b id="countDays">00</b><span>DAYS</span></div>
+              <i>:</i>
+              <div><b id="countHours">00</b><span>HRS</span></div>
+              <i>:</i>
+              <div><b id="countMinutes">00</b><span>MIN</span></div>
+              <i>:</i>
+              <div><b id="countSeconds">00</b><span>SEC</span></div>
+            </div>
+            <div class="promo-expired" id="promoExpired" hidden>Offer ended. Ask about current promotions.</div>
+          </div>
           <div class="quote-header">
             <span class="pill">FREE CUSTOM QUOTE</span>
             <h2>Let’s map your home.</h2>
@@ -143,7 +160,7 @@
                 <button type="button" class="button-secondary form-back">Back</button>
                 <button type="submit" class="button" id="submitBtn">Get My Free Quote</button>
               </div>
-              <p class="form-note">No obligation. Your information is used only to follow up about your lighting project.</p>
+              <p class="form-note">No obligation. Your information is used only to follow up about your lighting project.<br><span class="promo-terms">10% offer applies to eligible new residential installation projects booked by Oct. 31, 2026. Cannot be combined with other offers.</span></p>
             </section>
 
             <div class="form-message" id="formMessage" role="status" aria-live="polite"></div>
