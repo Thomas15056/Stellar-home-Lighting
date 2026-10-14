@@ -29,7 +29,7 @@ const clean = (value, limit = 500) =>
 
 export default {
   async fetch(request, env) {
-    const url = new URL(request.url);
+        const url = new URL(request.url);
 
     // Serve the normal website for non-API requests.
     if (url.pathname !== "/api/lead") {
@@ -302,10 +302,14 @@ export default {
         message: "Quote request submitted successfully.",
       });
     } catch (error) {
-      console.error(
-        "Stellar lead submission error:",
-        error
-      );
+  console.error(
+    "Stellar lead submission error:",
+    String(error),
+    "Message:",
+    error?.message,
+    "Cause:",
+    String(error?.cause ?? "none")
+  );
 
       return json(
         {
