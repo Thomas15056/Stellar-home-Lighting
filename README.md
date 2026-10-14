@@ -90,3 +90,4 @@ If Node is installed, you can use Wrangler locally:
 4. Open the local URL Wrangler prints.
 
 `.dev.vars` is ignored by Git and should never be committed.
+ 
