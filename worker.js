@@ -273,7 +273,7 @@ export default {
           },
           body: JSON.stringify(lead),
           signal: controller.signal,
-          redirect: "error",
+         redirect: "manual",
         });
       } finally {
         clearTimeout(timeout);
