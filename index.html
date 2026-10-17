@@ -155,11 +155,7 @@
 
             <div class="form-message" id="formMessage" role="status" aria-live="polite"></div>
           </form>
-          <div style="margin-top:20px;text-align:center">
-            <p>Save Stellar Home Lighting so you recognize our call.</p>
-            <a class="button button-small" href="data:text/vcard;charset=utf-8,BEGIN%3AVCARD%0D%0AVERSION%3A3.0%0D%0AFN%3AStellar%20Home%20Lighting%0D%0AN%3A%3BStellar%20Home%20Lighting%3B%3B%3B%0D%0AORG%3AStellar%20Home%20Lighting%0D%0ATEL%3BTYPE%3DWORK%2CVOICE%3A%2B18502967028%0D%0AEND%3AVCARD%0D%0A" download="Stellar-Home-Lighting.vcf">Save our contact</a>
-            <p class="form-note">(850) 296-7028 · Open the contact card and confirm Save or Add Contact on your device.</p>
-          </div>
+
         </aside>
       </div>
     </section>
@@ -384,6 +380,11 @@
           <h3>You’re on our radar.</h3>
           <p>Thanks, ${escapeHtml(payload.first_name)}. Stellar Home Lighting received your project details and will follow up about your custom quote.</p>
           <a class="button" href="tel:+18502967028">Call or Text (850) 296-7028</a>
+          <div style="margin-top:20px;text-align:center">
+            <p>Save Stellar Home Lighting so you recognize our call.</p>
+            <a class="button button-small" href="data:text/vcard;charset=utf-8,BEGIN%3AVCARD%0D%0AVERSION%3A3.0%0D%0AFN%3AStellar%20Home%20Lighting%0D%0AN%3A%3BStellar%20Home%20Lighting%3B%3B%3B%0D%0AORG%3AStellar%20Home%20Lighting%0D%0ATEL%3BTYPE%3DWORK%2CVOICE%3A%2B18502967028%0D%0AEND%3AVCARD%0D%0A" download="Stellar-Home-Lighting.vcf">Save our contact</a>
+            <p class="form-note">(850) 296-7028 · Open the contact card and confirm Save or Add Contact on your device.</p>
+          </div>
         </div>`;
     } catch (error) {
       console.error('Lead submission error:', error);
