@@ -33,3 +33,39 @@ img{display:block;max-width:100%}
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}.ticker-track{animation:none}.form-step.active{animation:none}.button,.gallery-grid img{transition:none}}
 @media(max-width:980px){.nav-links{display:none}.hero{padding-top:52px}.hero-grid{grid-template-columns:1fr;gap:42px}.quote-card{position:relative;top:auto;max-width:650px;margin:0 auto}.hero-copy{text-align:center}.hero-copy .eyebrow{margin:0 auto}.hero-lede{margin-left:auto;margin-right:auto}.hero-actions,.hero-badges{justify-content:center}.hero-photo-wrap{max-width:760px;margin:52px auto 0}.split-heading{grid-template-columns:1fr;gap:14px}.feature-grid,.process-grid{grid-template-columns:1fr 1fr}.gallery-grid{grid-template-columns:1fr 1fr}.florida-card,.final-cta-inner{flex-direction:column;align-items:flex-start}.footer-grid{grid-template-columns:1fr}.footer-contact{text-align:left}}
 @media(max-width:620px){.container{width:min(100% - 28px,1180px)}.nav{height:68px}.brand img{width:43px;height:43px}.brand-copy b{font-size:14px}.nav .button-small{display:none}.hero{padding:39px 0 62px;min-height:auto}.hero-copy{text-align:left}.hero-copy .eyebrow{margin:0;font-size:10px}.hero h1{font-size:47px;line-height:1}.hero-lede{font-size:16px;line-height:1.62}.hero-actions{justify-content:flex-start;align-items:flex-start;flex-direction:column}.hero-badges{justify-content:flex-start;gap:10px 16px}.hero-photo-wrap{margin-top:35px}.hero-photo-wrap img{height:260px}.orbit{display:none}.photo-chip{padding:9px 11px}.photo-chip span{font-size:11px}.photo-chip small{font-size:8px}.quote-card{padding:20px;border-radius:22px}.quote-header h2{font-size:27px}.choice-grid,.budget-grid,.field-row{grid-template-columns:1fr}.budget-option.wide{grid-column:auto}.section{padding:76px 0}.section-heading h2{font-size:39px}.feature-grid,.process-grid{grid-template-columns:1fr}.gallery-grid{grid-template-columns:1fr;grid-auto-rows:245px}.gallery-wide,.gallery-tall{grid-column:auto;grid-row:auto}.florida-card{padding:29px 22px}.florida-card h2{font-size:34px}.final-cta{padding:64px 0}.footer-grid{gap:24px}.step-actions{grid-template-columns:.42fr 1fr}}
+
+/* Footer legal links */
+.footer-legal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.footer-legal .footer-copy {
+  margin: 0;
+}
+
+.footer-legal-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 12px;
+}
+
+.footer-legal-links a {
+  color: #94a3b8;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-legal-links a:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+.footer-legal-links span {
+  color: #64748b;
+}
