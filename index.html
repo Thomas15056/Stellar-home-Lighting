@@ -145,7 +145,51 @@
                 </div>
               </fieldset>
               <input class="hp-field" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
-              <label class="consent"><input type="checkbox" name="consent" required><span>I agree to be contacted by Stellar Home Lighting about my quote by call, text, or email. Message and data rates may apply.</span></label>
+              
+<div class="sms-consent-options">
+
+  <label class="consent">
+    <input type="checkbox"
+           name="sms_transactional"
+           id="smsTransactional"
+           value="yes">
+    <span>
+      I agree to receive text messages from Stellar Home Lighting
+      (TopWash Tallahassee LLC) regarding my requested quote,
+      appointment reminders, and installation updates.
+      Message frequency varies. Message and data rates may apply.
+      Reply STOP to opt out or HELP for assistance.
+    </span>
+  </label>
+
+  <label class="consent">
+    <input type="checkbox"
+           name="sms_marketing"
+           id="smsMarketing"
+           value="yes">
+    <span>
+      I agree to receive marketing text messages from
+      Stellar Home Lighting (TopWash Tallahassee LLC),
+      including promotional offers and discounts.
+      Message frequency varies. Message and data rates may apply.
+      Reply STOP to opt out or HELP for assistance.
+      Consent is not a condition of purchase.
+    </span>
+  </label>
+
+  <p class="form-note">
+    SMS consent is optional. View our
+    <a href="/privacy-policy" target="_blank" rel="noopener">
+      Privacy Policy
+    </a>
+    and
+    <a href="/terms-and-conditions" target="_blank" rel="noopener">
+      Terms and Conditions
+    </a>.
+  </p>
+
+</div>
+
               <div class="step-actions">
                 <button type="button" class="button-secondary form-back">Back</button>
                 <button type="submit" class="button" id="submitBtn">Get My Free Quote</button>
