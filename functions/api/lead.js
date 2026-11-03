@@ -1,10 +1,12 @@
 
 /**
  * Stellar Home Lighting
- * Cloudflare Pages Function: POST /api/lead
+ * Cloudflare Pages Function
+ * POST /api/lead
+ *
  * Sends website leads to GoHighLevel.
  *
- * Required Cloudflare secret:
+ * Cloudflare environment secret:
  * LEAD_WEBHOOK_URL or GHL_WEBHOOK_URL
  */
 
@@ -18,7 +20,9 @@ const reply = (obj, status = 200) =>
   });
 
 const str = (v, max = 300) =>
-  typeof v === "string" ? v.trim().slice(0, max) : "";
+  typeof v === "string"
+    ? v.trim().slice(0, max)
+    : "";
 
 const budgets = [
   "$800–$1,499",
@@ -33,9 +37,12 @@ const budgets = [
 export async function onRequestPost({ request, env }) {
   try {
     const url =
-      env.LEAD_WEBHOOK_URL || env.GHL_WEBHOOK_URL;
+      env.LEAD_WEBHOOK_URL ||
+      env.GHL_WEBHOOK_URL;
 
     if (!url) {
+      console.error("GHL webhook not configured");
+
       return reply({
         ok: false,
         error: "Lead service is not configured."
@@ -48,19 +55,24 @@ export async function onRequestPost({ request, env }) {
       webhook = new URL(url);
 
       if (webhook.protocol !== "https:") {
-        throw Error();
+        throw new Error("Invalid webhook protocol");
       }
     } catch {
+      console.error("Invalid GHL webhook configuration");
+
       return reply({
         ok: false,
         error: "Lead service is not configured."
       }, 503);
     }
 
+    // Verify request content type
     if (
       !(request.headers.get("content-type") || "")
         .includes("application/json")
     ) {
+      console.error("Invalid content type");
+
       return reply({
         ok: false,
         error: "JSON required."
@@ -94,6 +106,8 @@ export async function onRequestPost({ request, env }) {
     try {
       data = JSON.parse(body);
     } catch {
+      console.error("Invalid JSON body");
+
       return reply({
         ok: false,
         error: "Invalid JSON."
@@ -105,6 +119,8 @@ export async function onRequestPost({ request, env }) {
       typeof data !== "object" ||
       Array.isArray(data)
     ) {
+      console.error("Invalid JSON object");
+
       return reply({
         ok: false,
         error: "Invalid request."
@@ -137,6 +153,7 @@ export async function onRequestPost({ request, env }) {
 
     // Phone number
     const phone = str(data.phone, 40);
+
     const digits = phone.replace(/\D/g, "");
 
     const normalizedPhone =
@@ -152,23 +169,47 @@ export async function onRequestPost({ request, env }) {
     const budget = str(data.budget_range, 100);
     const email = str(data.email, 254);
 
-    if (
-      !firstName ||
-      !normalizedPhone ||
-      !address ||
-      !budgets.includes(budget)
-    ) {
+    // Detailed validation diagnostics.
+    // Only log field names, never personal data.
+    const missingFields = [];
+
+    if (!firstName) {
+      missingFields.push("first_name");
+    }
+
+    if (!normalizedPhone) {
+      missingFields.push("phone");
+    }
+
+    if (!address) {
+      missingFields.push("address");
+    }
+
+    if (!budgets.includes(budget)) {
+      missingFields.push("budget_range");
+    }
+
+    if (missingFields.length > 0) {
+      console.error(
+        "Lead validation failed:",
+        missingFields.join(", ")
+      );
+
       return reply({
         ok: false,
-        error:
-          "Complete name, US phone, address, and budget."
+        error: "Please check your form information."
       }, 400);
     }
 
+    // Optional email validation
     if (
       email &&
       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
     ) {
+      console.error(
+        "Lead validation failed: email"
+      );
+
       return reply({
         ok: false,
         error: "Invalid email."
@@ -184,13 +225,26 @@ export async function onRequestPost({ request, env }) {
 
     const now = new Date().toISOString();
 
-    // Discount request is not yet verified
-    // against a server-side expiration time.
+    // Record consent timestamps only
+    // when the respective checkbox was selected.
+    const transactionalConsentAt =
+      smsTransactional ? now : null;
+
+    const marketingConsentAt =
+      smsMarketing ? now : null;
+
+    // Discount is pending verification.
     const discountRequested =
       data.discount_percent === 10 &&
       data.discount_offer === "10% timed offer";
 
-    // Payload forwarded to GoHighLevel
+    // Contact preference
+    const callPreference = str(
+      data.quick_call_available,
+      100
+    );
+
+    // Build GoHighLevel payload
     const lead = {
       first_name: firstName,
       last_name: lastName,
@@ -214,6 +268,8 @@ export async function onRequestPost({ request, env }) {
         100
       ),
 
+      quick_call_available: callPreference,
+
       service: "Permanent Outdoor Lighting",
 
       lead_source:
@@ -226,6 +282,12 @@ export async function onRequestPost({ request, env }) {
       sms_transactional: smsTransactional,
       sms_marketing: smsMarketing,
 
+      sms_transactional_consent_at:
+        transactionalConsentAt,
+
+      sms_marketing_consent_at:
+        marketingConsentAt,
+
       sms_consent_source:
         str(data.page_url, 1000) ||
         str(
@@ -233,21 +295,22 @@ export async function onRequestPost({ request, env }) {
           1000
         ),
 
-      sms_consent_recorded_at: now,
-
       // Promotional discount
       discount_requested: discountRequested,
 
       discount_percent_requested:
         discountRequested ? 10 : 0,
 
-      discount_status: "Pending verification",
+      discount_status:
+        discountRequested
+          ? "Pending verification"
+          : "Not requested",
 
       page_url: str(data.page_url, 1000),
       submitted_at: now
     };
 
-    // Send lead to GHL
+    // Send lead to GoHighLevel
     const controller = new AbortController();
 
     const timeout = setTimeout(
@@ -276,7 +339,7 @@ export async function onRequestPost({ request, env }) {
 
     if (!response.ok) {
       console.error(
-        "GHL webhook HTTP status",
+        "GHL webhook failed with HTTP status:",
         response.status
       );
 
@@ -286,6 +349,8 @@ export async function onRequestPost({ request, env }) {
       }, 502);
     }
 
+    console.log("Lead forwarded to GHL webhook");
+
     return reply({
       ok: true,
       success: true,
@@ -294,8 +359,8 @@ export async function onRequestPost({ request, env }) {
 
   } catch (e) {
     console.error(
-      "Lead request failed",
-      e?.message
+      "Lead request failed:",
+      e?.name || "UnknownError"
     );
 
     return reply({
