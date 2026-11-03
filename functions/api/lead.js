@@ -1,165 +1,103 @@
 
 /**
  * Stellar Home Lighting
- * Cloudflare Pages Function
+ * Cloudflare Pages Function: POST /api/lead
+ * Sends website leads to GoHighLevel.
  *
- * File: functions/api/lead.js
- * Endpoint: POST /api/lead
- *
- * Cloudflare Secret:
- * LEAD_WEBHOOK_URL = Your GoHighLevel inbound webhook URL
- *
- * No npm packages required.
+ * Required Cloudflare secret:
+ * LEAD_WEBHOOK_URL or GHL_WEBHOOK_URL
  */
 
-const json = (data, status = 200) =>
-  new Response(JSON.stringify(data), {
+const reply = (obj, status = 200) =>
+  new Response(JSON.stringify(obj), {
     status,
     headers: {
       "Content-Type": "application/json; charset=utf-8",
-      "Cache-Control": "no-store",
-      "X-Content-Type-Options": "nosniff",
-    },
+      "Cache-Control": "no-store"
+    }
   });
 
-const clean = (value, limit = 500) =>
-  typeof value === "string"
-    ? value.trim().slice(0, limit)
-    : "";
+const str = (v, max = 300) =>
+  typeof v === "string" ? v.trim().slice(0, max) : "";
+
+const budgets = [
+  "$800–$1,499",
+  "$1,500–$2,499",
+  "$2,500–$3,499",
+  "$3,500–$4,999",
+  "$5,000–$6,999",
+  "$7,000–$9,999",
+  "$10,000+"
+];
 
 export async function onRequestPost({ request, env }) {
   try {
-    // Get GoHighLevel webhook from Cloudflare.
-    const WEBHOOK_URL = env.LEAD_WEBHOOK_URL;
+    const url =
+      env.LEAD_WEBHOOK_URL || env.GHL_WEBHOOK_URL;
 
-    if (!WEBHOOK_URL) {
-      console.error("LEAD_WEBHOOK_URL is missing");
-
-      return json(
-        {
-          ok: false,
-          error: "Service temporarily unavailable",
-        },
-        503
-      );
+    if (!url) {
+      return reply({
+        ok: false,
+        error: "Lead service is not configured."
+      }, 503);
     }
 
-    // Require HTTPS for the webhook.
     let webhook;
 
     try {
-      webhook = new URL(WEBHOOK_URL);
+      webhook = new URL(url);
 
       if (webhook.protocol !== "https:") {
-        throw new Error("HTTPS required");
+        throw Error();
       }
     } catch {
-      console.error("Invalid webhook configuration");
-
-      return json(
-        {
-          ok: false,
-          error: "Service temporarily unavailable",
-        },
-        503
-      );
+      return reply({
+        ok: false,
+        error: "Lead service is not configured."
+      }, 503);
     }
-
-    // Only accept JSON submissions.
-    const contentType =
-      request.headers.get("content-type") || "";
 
     if (
-      !contentType
-        .toLowerCase()
+      !(request.headers.get("content-type") || "")
         .includes("application/json")
     ) {
-      return json(
-        {
-          ok: false,
-          error: "JSON content type required",
-        },
-        415
-      );
+      return reply({
+        ok: false,
+        error: "JSON required."
+      }, 415);
     }
 
-    // Limit incoming request size.
-    const MAX_BYTES = 16384;
-
-    const declaredLength = Number(
+    const length = Number(
       request.headers.get("content-length") || 0
     );
 
-    if (declaredLength > MAX_BYTES) {
-      return json(
-        {
-          ok: false,
-          error: "Request too large",
-        },
-        413
-      );
+    if (length > 16384) {
+      return reply({
+        ok: false,
+        error: "Request too large."
+      }, 413);
     }
 
-    // Read request with a size limit.
-    const reader = request.body?.getReader();
+    const body = await request.text();
 
-    if (!reader) {
-      return json(
-        {
-          ok: false,
-          error: "Request body required",
-        },
-        400
-      );
+    if (
+      new TextEncoder().encode(body).length > 16384
+    ) {
+      return reply({
+        ok: false,
+        error: "Request too large."
+      }, 413);
     }
-
-    const chunks = [];
-    let total = 0;
-
-    while (true) {
-      const { done, value } = await reader.read();
-
-      if (done) break;
-
-      total += value.byteLength;
-
-      if (total > MAX_BYTES) {
-        await reader.cancel();
-
-        return json(
-          {
-            ok: false,
-            error: "Request too large",
-          },
-          413
-        );
-      }
-
-      chunks.push(value);
-    }
-
-    const bytes = new Uint8Array(total);
-    let offset = 0;
-
-    for (const chunk of chunks) {
-      bytes.set(chunk, offset);
-      offset += chunk.byteLength;
-    }
-
-    const raw = new TextDecoder().decode(bytes);
 
     let data;
 
     try {
-      data = JSON.parse(raw);
+      data = JSON.parse(body);
     } catch {
-      return json(
-        {
-          ok: false,
-          error: "Invalid JSON",
-        },
-        400
-      );
+      return reply({
+        ok: false,
+        error: "Invalid JSON."
+      }, 400);
     }
 
     if (
@@ -167,131 +105,149 @@ export async function onRequestPost({ request, env }) {
       typeof data !== "object" ||
       Array.isArray(data)
     ) {
-      return json(
-        {
-          ok: false,
-          error: "Invalid form data",
-        },
-        400
-      );
+      return reply({
+        ok: false,
+        error: "Invalid request."
+      }, 400);
     }
 
-    // Honeypot field for basic bot protection.
+    // Honeypot spam protection
     if (data.website) {
-      return json({
-        ok: true,
-        success: true,
-      });
+      return reply({ ok: true });
     }
 
-    // Extract fields from Stellar's quote form.
-    const firstName = clean(data.first_name, 100);
-    const lastName = clean(data.last_name, 100);
-    const email = clean(data.email, 254);
-    const phone = clean(data.phone, 40);
-    const address = clean(data.address, 300);
-    const coverage = clean(data.home_coverage, 100);
-    const budget = clean(data.budget_range, 100);
+    // Customer name
+    const fullName = str(
+      data.full_name || data.name,
+      200
+    );
 
-    // Validate required fields.
+    const nameParts = fullName
+      .split(/\s+/)
+      .filter(Boolean);
+
+    const firstName =
+      str(data.first_name, 100) ||
+      nameParts[0] ||
+      "";
+
+    const lastName =
+      str(data.last_name, 100) ||
+      nameParts.slice(1).join(" ");
+
+    // Phone number
+    const phone = str(data.phone, 40);
+    const digits = phone.replace(/\D/g, "");
+
+    const normalizedPhone =
+      digits.length === 10
+        ? `+1${digits}`
+        : digits.length === 11 &&
+          digits.startsWith("1")
+          ? `+${digits}`
+          : "";
+
+    // Project information
+    const address = str(data.address, 300);
+    const budget = str(data.budget_range, 100);
+    const email = str(data.email, 254);
+
     if (
       !firstName ||
-      !lastName ||
-      !phone ||
+      !normalizedPhone ||
       !address ||
-      !coverage ||
-      !budget ||
-      data.consent !== true
+      !budgets.includes(budget)
     ) {
-      return json(
-        {
-          ok: false,
-          error: "Please complete all required fields.",
-        },
-        400
-      );
+      return reply({
+        ok: false,
+        error:
+          "Complete name, US phone, address, and budget."
+      }, 400);
     }
 
-    // Validate optional email.
     if (
       email &&
       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
     ) {
-      return json(
-        {
-          ok: false,
-          error: "Invalid email address",
-        },
-        400
-      );
+      return reply({
+        ok: false,
+        error: "Invalid email."
+      }, 400);
     }
 
-    // Validate coverage selection.
-    const allowedCoverage = [
-      "Front Only",
-      "Front + Sides",
-      "Full Home",
-      "Not Sure",
-    ];
+    // SMS consent must be explicitly true.
+    const smsTransactional =
+      data.sms_transactional === true;
 
-    if (!allowedCoverage.includes(coverage)) {
-      return json(
-        {
-          ok: false,
-          error: "Invalid home coverage selection",
-        },
-        400
-      );
-    }
+    const smsMarketing =
+      data.sms_marketing === true;
 
-    // Validate budget selection.
-    const allowedBudgets = [
-      "$1,500–$2,999",
-      "$3,000–$4,499",
-      "$4,500–$5,999",
-      "$6,000–$7,499",
-      "$7,500–$8,999",
-      "$9,000–$9,999",
-      "$10,000+",
-    ];
+    const now = new Date().toISOString();
 
-    if (!allowedBudgets.includes(budget)) {
-      return json(
-        {
-          ok: false,
-          error: "Invalid budget selection",
-        },
-        400
-      );
-    }
+    // Discount request is not yet verified
+    // against a server-side expiration time.
+    const discountRequested =
+      data.discount_percent === 10 &&
+      data.discount_offer === "10% timed offer";
 
-    // Prepare lead for GoHighLevel.
+    // Payload forwarded to GoHighLevel
     const lead = {
       first_name: firstName,
       last_name: lastName,
-      name: `${firstName} ${lastName}`,
+
+      full_name: [firstName, lastName]
+        .filter(Boolean)
+        .join(" "),
+
+      name: [firstName, lastName]
+        .filter(Boolean)
+        .join(" "),
+
+      phone: normalizedPhone,
       email: email,
-      phone: phone,
       address: address,
 
-      // Project information
-      home_coverage: coverage,
       budget_range: budget,
+
+      home_coverage: str(
+        data.home_coverage,
+        100
+      ),
+
       service: "Permanent Outdoor Lighting",
 
-      // Marketing information
-      lead_source: "Stellar Home Lighting Website",
+      lead_source:
+        str(data.lead_source, 100) ||
+        "Stellar Home Lighting Website",
+
       state_market: "Florida",
 
-      // Contact permission
-      consent: true,
+      // Separate SMS permissions
+      sms_transactional: smsTransactional,
+      sms_marketing: smsMarketing,
 
-      // Submission metadata
-      page_url: clean(data.page_url, 1000),
-      submitted_at: new Date().toISOString(),
+      sms_consent_source:
+        str(data.page_url, 1000) ||
+        str(
+          request.headers.get("referer"),
+          1000
+        ),
+
+      sms_consent_recorded_at: now,
+
+      // Promotional discount
+      discount_requested: discountRequested,
+
+      discount_percent_requested:
+        discountRequested ? 10 : 0,
+
+      discount_status: "Pending verification",
+
+      page_url: str(data.page_url, 1000),
+      submitted_at: now
     };
 
-    // Forward the lead to GoHighLevel.
+    // Send lead to GHL
     const controller = new AbortController();
 
     const timeout = setTimeout(
@@ -304,65 +260,54 @@ export async function onRequestPost({ request, env }) {
     try {
       response = await fetch(webhook.toString(), {
         method: "POST",
+
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
+
         body: JSON.stringify(lead),
+
         signal: controller.signal,
-        redirect: "error",
+        redirect: "error"
       });
     } finally {
       clearTimeout(timeout);
     }
 
-    // Check GoHighLevel response.
     if (!response.ok) {
       console.error(
-        "GoHighLevel webhook failed:",
+        "GHL webhook HTTP status",
         response.status
       );
 
-      return json(
-        {
-          ok: false,
-          error: "Unable to submit your quote request.",
-        },
-        502
-      );
+      return reply({
+        ok: false,
+        error: "Unable to submit quote."
+      }, 502);
     }
 
-    // Return success to the website.
-    return json(
-      {
-        ok: true,
-        success: true,
-        message: "Quote request submitted successfully.",
-      },
-      200
-    );
-  } catch (error) {
+    return reply({
+      ok: true,
+      success: true,
+      discount_status: lead.discount_status
+    });
+
+  } catch (e) {
     console.error(
-      "Stellar lead submission error:",
-      error
+      "Lead request failed",
+      e?.message
     );
 
-    return json(
-      {
-        ok: false,
-        error: "Unable to process your request.",
-      },
-      500
-    );
+    return reply({
+      ok: false,
+      error: "Unable to process request."
+    }, 500);
   }
 }
 
-// Used to verify that the API endpoint is deployed.
 export function onRequestGet() {
-  return json(
-    {
-      ok: false,
-      error: "Method not allowed",
-    },
-    405
-  );
+  return reply({
+    ok: false,
+    error: "Method not allowed"
+  }, 405);
 }
