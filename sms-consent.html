@@ -3,40 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Optional SMS consent for Stellar Home Lighting, a DBA of TopWash Tallahassee LLC.">
+  <meta name="description" content="SMS opt-in for Stellar Home Lighting, a DBA of TopWash Tallahassee LLC.">
   <title>SMS Consent | Stellar Home Lighting</title>
 
   <style>
-    :root {
-      color-scheme: dark;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      background: radial-gradient(
-        ellipse at 75% 0%,
-        #172d56 0%,
-        #071329 45%,
-        #030713 85%
-      );
+      background: radial-gradient(ellipse at 75% 0%, #172d56 0%, #071329 45%, #030713 85%);
       color: #edf3ff;
       font: 16px/1.6 Inter, system-ui, Arial, sans-serif;
       min-height: 100vh;
     }
 
-    a {
-      color: #a6caff;
-    }
+    a { color: #a6caff; }
 
-    header, footer {
-      max-width: 860px;
-      margin: auto;
-      padding: 26px 24px;
-    }
+    header, footer { max-width: 860px; margin: auto; padding: 26px 24px; }
 
     header {
       display: flex;
@@ -45,15 +29,9 @@
       border-bottom: 1px solid #24344d;
     }
 
-    header strong {
-      letter-spacing: 0.12em;
-    }
+    header strong { letter-spacing: 0.12em; }
 
-    main {
-      max-width: 760px;
-      margin: 45px auto 80px;
-      padding: 0 22px;
-    }
+    main { max-width: 760px; margin: 45px auto 80px; padding: 0 22px; }
 
     .eyebrow {
       color: #91b8ff;
@@ -63,20 +41,9 @@
       letter-spacing: 0.15em;
     }
 
-    h1 {
-      font-size: clamp(32px, 6vw, 49px);
-      line-height: 1.15;
-      margin: 12px 0;
-    }
-
-    h2 {
-      font-size: 22px;
-      margin-top: 0;
-    }
-
-    p {
-      color: #c4d0e2;
-    }
+    h1 { font-size: clamp(32px, 6vw, 49px); line-height: 1.15; margin: 12px 0; }
+    h2 { font-size: 22px; margin-top: 0; }
+    p { color: #c4d0e2; }
 
     .panel {
       background: #0c1930;
@@ -87,11 +54,7 @@
       box-shadow: 0 18px 45px #0004;
     }
 
-    label.field {
-      display: block;
-      font-weight: 600;
-      margin: 16px 0 7px;
-    }
+    label.field { display: block; font-weight: 600; margin: 16px 0 7px; }
 
     input[type="text"],
     input[type="tel"],
@@ -105,21 +68,7 @@
       font: inherit;
     }
 
-    input:focus {
-      outline: 2px solid #84b8ff;
-      outline-offset: 2px;
-    }
-
-    fieldset {
-      border: 0;
-      margin: 22px 0;
-      padding: 0;
-    }
-
-    legend {
-      font-weight: 700;
-      margin-bottom: 14px;
-    }
+    input:focus { outline: 2px solid #84b8ff; outline-offset: 2px; }
 
     .consent {
       display: flex;
@@ -128,7 +77,7 @@
       padding: 18px;
       border: 1px solid #405472;
       border-radius: 12px;
-      margin: 13px 0;
+      margin: 24px 0 13px;
       background: #101f37;
       cursor: pointer;
     }
@@ -141,21 +90,9 @@
       margin-top: 4px;
     }
 
-    .consent strong {
-      display: block;
-      color: white;
-      margin-bottom: 5px;
-    }
+    .consent span { font-size: 14px; color: #d3dfef; }
 
-    .consent span {
-      font-size: 14px;
-      color: #d3dfef;
-    }
-
-    .small {
-      font-size: 13px;
-      color: #aabbd2;
-    }
+    .small { font-size: 13px; color: #aabbd2; }
 
     .button {
       display: inline-block;
@@ -165,32 +102,15 @@
       color: #06142a;
       padding: 14px 24px;
       font: 700 16px system-ui;
-      text-decoration: none;
       cursor: pointer;
     }
 
-    .button:hover {
-      background: #c0dcff;
-    }
+    .button:hover { background: #c0dcff; }
+    .button:disabled { opacity: 0.65; cursor: wait; }
 
-    .button:disabled {
-      opacity: 0.65;
-      cursor: wait;
-    }
-
-    .message {
-      margin-top: 15px;
-      font-weight: 600;
-      min-height: 24px;
-    }
-
-    .success {
-      color: #8ee7b5;
-    }
-
-    .error {
-      color: #ffaaaa;
-    }
+    .message { margin-top: 15px; font-weight: 600; min-height: 24px; }
+    .success { color: #8ee7b5; }
+    .error { color: #ffaaaa; }
 
     .notice {
       padding: 15px;
@@ -201,25 +121,16 @@
       font-size: 14px;
     }
 
-    footer {
-      border-top: 1px solid #26344d;
-      color: #a7b5c8;
-      font-size: 13px;
-    }
+    .legal { margin-top: 40px; }
+    .legal h2 { margin-bottom: 8px; }
+    .legal p { font-size: 14px; }
 
-    footer a {
-      margin-right: 16px;
-    }
+    footer { border-top: 1px solid #26344d; color: #a7b5c8; font-size: 13px; }
+    footer a { margin-right: 16px; }
 
     @media (max-width: 520px) {
-      header {
-        display: block;
-      }
-
-      header a {
-        display: block;
-        margin-top: 8px;
-      }
+      header { display: block; }
+      header a { display: block; margin-top: 8px; }
     }
   </style>
 </head>
@@ -239,13 +150,8 @@
 
     <p>
       Stellar Home Lighting, a DBA of TopWash Tallahassee LLC,
-      offers optional text updates about your lighting project
-      and optional promotional messages.
-    </p>
-
-    <p>
-      You may select either message category, both categories,
-      or neither. SMS consent is never required to request
+      offers optional text messages about your quote, appointments,
+      and installation. SMS consent is never required to request
       a quote or purchase our services.
     </p>
 
@@ -254,214 +160,123 @@
       <h2>Manage Your SMS Preferences</h2>
 
       <p>
-        Enter your contact information below and choose which
-        SMS messages, if any, you would like to receive.
+        Enter your contact information below. Checking the box is
+        optional. You can submit this form without opting in to text messages.
       </p>
 
       <form id="smsForm">
 
-        <label class="field" for="first">
-          First Name
+        <label class="field" for="first">First Name</label>
+        <input id="first" name="first_name" type="text" autocomplete="given-name" required>
+
+        <label class="field" for="last">Last Name</label>
+        <input id="last" name="last_name" type="text" autocomplete="family-name" required>
+
+        <label class="field" for="phone">Mobile Phone Number</label>
+        <input id="phone" name="phone" type="tel" autocomplete="tel" placeholder="(850) 555-1234" required>
+
+        <label class="field" for="email">Email</label>
+        <input id="email" name="email" type="email" autocomplete="email" required>
+
+        <!-- SINGLE OPTIONAL CONSENT CHECKBOX: NOT pre-checked, NOT required -->
+        <label class="consent" for="sms_consent">
+
+          <input id="sms_consent" name="sms_consent" type="checkbox" value="yes">
+
+          <span>
+            I agree to receive recurring automated text messages from
+            Stellar Home Lighting, a DBA of TopWash Tallahassee LLC,
+            at the phone number provided, regarding my quote request,
+            appointment scheduling and reminders, installation updates,
+            and customer care.
+            Message &amp; data rates may apply.
+            Message frequency varies.
+            Reply STOP to opt-out. Reply HELP for help.
+            Consent is optional and is not a condition of purchasing goods or services.
+            View our
+            <a href="/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>
+            and
+            <a href="/terms-and-conditions" target="_blank" rel="noopener">Terms of Service</a>,
+            as well as our
+            <a href="#sms-terms">SMS Terms</a>
+            and
+            <a href="#sms-privacy">SMS Privacy Policy</a>.
+          </span>
+
         </label>
-
-        <input
-          id="first"
-          name="first_name"
-          type="text"
-          autocomplete="given-name"
-          required
-        >
-
-        <label class="field" for="last">
-          Last Name
-        </label>
-
-        <input
-          id="last"
-          name="last_name"
-          type="text"
-          autocomplete="family-name"
-          required
-        >
-
-        <label class="field" for="phone">
-          Mobile Phone Number
-        </label>
-
-        <input
-          id="phone"
-          name="phone"
-          type="tel"
-          autocomplete="tel"
-          placeholder="(850) 555-1234"
-          required
-        >
-
-        <label class="field" for="email">
-          Email (Optional)
-        </label>
-
-        <input
-          id="email"
-          name="email"
-          type="email"
-          autocomplete="email"
-        >
-
-        <fieldset>
-
-          <legend>
-            SMS Consent (Both Options Are Optional)
-          </legend>
-
-          <!-- OPTIONAL TRANSACTIONAL CONSENT -->
-
-          <label class="consent">
-
-            <input
-              id="transactional"
-              name="sms_transactional"
-              type="checkbox"
-              value="yes"
-            >
-
-            <span>
-
-              <strong>
-                Customer Service &amp; Project Updates
-              </strong>
-
-              I agree to receive SMS messages from Stellar Home
-              Lighting, a DBA of TopWash Tallahassee LLC,
-              regarding quote requests, appointment scheduling,
-              appointment reminders, installation updates,
-              and customer service.
-
-              Message frequency varies.
-              Message and data rates may apply.
-              Reply STOP to unsubscribe or HELP for assistance.
-              Contact (850) 296-7028 for support.
-
-              Consent is optional and is not a condition
-              of purchasing goods or services.
-
-            </span>
-
-          </label>
-
-          <!-- OPTIONAL MARKETING CONSENT -->
-
-          <label class="consent">
-
-            <input
-              id="marketing"
-              name="sms_marketing"
-              type="checkbox"
-              value="yes"
-            >
-
-            <span>
-
-              <strong>
-                Promotional &amp; Marketing Messages
-              </strong>
-
-              I agree to receive promotional and marketing
-              SMS messages from Stellar Home Lighting,
-              a DBA of TopWash Tallahassee LLC.
-
-              Messages may include discounts,
-              seasonal offers, promotions, and information
-              about permanent outdoor lighting services.
-
-              Message frequency varies.
-              Message and data rates may apply.
-              Reply STOP to unsubscribe or HELP for assistance.
-              Contact (850) 296-7028 for support.
-
-              Consent is optional and is not a condition
-              of purchasing goods or services.
-
-            </span>
-
-          </label>
-
-        </fieldset>
 
         <p class="small">
-          Both checkboxes are unchecked by default.
-          You may select neither checkbox and still submit
-          this form. Declining SMS messages will not affect
-          your ability to request a quote or purchase services.
+          The checkbox is unchecked by default and is optional. If you leave it
+          unchecked, you will not receive text messages, and your ability to
+          request a quote or purchase services will not be affected.
         </p>
 
-        <p class="small">
-          We do not sell or share SMS opt-in consent with
-          third parties for their marketing purposes.
-        </p>
+        <button class="button" id="submit" type="submit">Save My Preferences</button>
 
-        <p class="small">
-          Review our
-          <a href="/privacy-policy">Privacy Policy</a>
-          and
-          <a href="/terms-and-conditions">Terms and Conditions</a>.
-        </p>
-
-        <button
-          class="button"
-          id="submit"
-          type="submit"
-        >
-          Save My Preferences
-        </button>
-
-        <div
-          class="message"
-          id="status"
-          role="status"
-          aria-live="polite"
-        ></div>
+        <div class="message" id="status" role="status" aria-live="polite"></div>
 
       </form>
 
       <div class="notice">
         <strong>Don't want SMS messages?</strong>
-        You can leave both boxes unchecked and save your
-        preferences, or simply
+        Leave the box unchecked and save your preferences, or simply
         <a href="/#quote">request a free quote</a>
         without consenting to text messages.
       </div>
 
     </section>
 
-    <p class="small">
-      Need assistance?
-      Call
-      <a href="tel:+18502967028">(850) 296-7028</a>.
-      You can also reply STOP to any SMS message
-      to unsubscribe.
+    <section class="legal" id="sms-terms">
+      <h2>SMS Terms of Service</h2>
+      <p>
+        By opting in, you agree to receive recurring automated text messages from
+        Stellar Home Lighting, a DBA of TopWash Tallahassee LLC, regarding your quote
+        request, appointment scheduling and reminders, installation updates, and
+        customer care. Message frequency varies, and consent isn't required to
+        purchase any goods or services. To unsubscribe, text STOP at any time or use
+        any reasonable method to tell us you no longer want to receive messages.
+        Text HELP for help, or reach out to us by calling
+        <a href="tel:+18502967028">(850) 296-7028</a> or emailing
+        <a href="mailto:stellarhomelighting@gmail.com">stellarhomelighting@gmail.com</a>.
+        Carrier message and data rates may apply. We may change our messaging number
+        at any time and aren't liable for delayed or missed messages. Your phone number
+        is collected voluntarily and used only to send the messages described above;
+        it is shared only with our SMS provider and is not shared with third parties
+        for marketing. See our <a href="/privacy-policy">Privacy Policy</a> for details.
+      </p>
+    </section>
+
+    <section class="legal" id="sms-privacy">
+      <h2>SMS Privacy Policy</h2>
+      <p>
+        Your privacy matters to us. We use your information to send quote updates,
+        appointment scheduling and reminders, installation updates, and customer care
+        messages via SMS. We don't share your mobile information with third parties
+        for marketing. Opt-in data and consent for messaging are never shared outside
+        our SMS provider. To unsubscribe, reply STOP. Reply HELP for help. For more
+        information, see our <a href="/terms-and-conditions">Terms of Service</a>.
+      </p>
+    </section>
+
+    <p class="small" style="margin-top:30px;">
+      Need assistance? Call <a href="tel:+18502967028">(850) 296-7028</a> or email
+      <a href="mailto:stellarhomelighting@gmail.com">stellarhomelighting@gmail.com</a>.
+      You can also reply STOP to any SMS message to unsubscribe.
     </p>
 
   </main>
 
   <footer>
-
     <strong>Stellar Home Lighting</strong>
-
-    <p>
-      A DBA of TopWash Tallahassee LLC
-    </p>
-
+    <p>A DBA of TopWash Tallahassee LLC</p>
     <p>
       5146 Lakehurst Ct<br>
       Palmetto, FL 34221<br>
       United States
     </p>
-
     <a href="/">Home</a>
     <a href="/privacy-policy">Privacy Policy</a>
     <a href="/terms-and-conditions">Terms and Conditions</a>
-
   </footer>
 
   <script>
@@ -483,14 +298,8 @@
           return;
         }
 
-        const transactional =
-          document.getElementById('transactional').checked;
-
-        const marketing =
-          document.getElementById('marketing').checked;
-
-        // Neither consent checkbox is required.
-        // FALSE / FALSE is a valid submission.
+        // Consent is optional. FALSE is a valid submission.
+        const consent = document.getElementById('sms_consent').checked;
 
         const formData = new FormData(form);
 
@@ -499,13 +308,15 @@
           last_name: String(formData.get('last_name') || '').trim(),
           phone: String(formData.get('phone') || '').trim(),
           email: String(formData.get('email') || '').trim(),
-          sms_transactional: transactional,
-          sms_marketing: marketing,
+          sms_consent: consent,
+          // Kept so your existing backend fields still receive a value
+          sms_transactional: consent,
+          sms_marketing: false,
           lead_source: 'Stellar Home Lighting SMS Consent Page',
           service: 'Permanent Outdoor Lighting',
           page_url: window.location.href,
           submitted_at: new Date().toISOString(),
-          consent_text_version: '2026-11-26'
+          consent_text_version: '2026-11-26-v3'
         };
 
         button.disabled = true;
@@ -515,7 +326,6 @@
         let succeeded = true;
 
         try {
-
           const response = await fetch('/api/lead', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -528,36 +338,25 @@
             console.error('Submission was not accepted:', response.status, result);
             succeeded = false;
           }
-
         } catch (error) {
-
           console.error('SMS form submission error:', error);
           succeeded = false;
-
         }
 
         if (succeeded || FORCE_SUCCESS) {
-
           status.className = 'message success';
-
-          status.textContent = (!transactional && !marketing)
-            ? 'Your preferences have been submitted. You have not opted in to SMS messages.'
-            : 'Thank you! Your selected SMS preferences have been submitted successfully.';
-
+          status.textContent = consent
+            ? 'Thank you! Your SMS preferences have been submitted successfully.'
+            : 'Your preferences have been submitted. You have not opted in to SMS messages.';
           form.reset();
-
         } else {
-
           status.className = 'message error';
           status.textContent =
             'Something went wrong. Please call (850) 296-7028 and we will help you.';
-
         }
 
         button.disabled = false;
-
       });
-
     });
   </script>
 
