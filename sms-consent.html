@@ -184,23 +184,12 @@
           <input id="sms_consent" name="sms_consent" type="checkbox" value="yes">
 
           <span>
-            I agree to receive recurring automated text messages from
-            Stellar Home Lighting, a DBA of TopWash Tallahassee LLC,
-            at the phone number provided, regarding my quote request,
-            appointment scheduling and reminders, installation updates,
-            and customer care.
-            Message &amp; data rates may apply.
-            Message frequency varies.
-            Reply STOP to opt-out. Reply HELP for help.
-            Consent is optional and is not a condition of purchasing goods or services.
-            View our
-            <a href="/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>
-            and
-            <a href="/terms-and-conditions" target="_blank" rel="noopener">Terms of Service</a>,
-            as well as our
-            <a href="#sms-terms">SMS Terms</a>
-            and
-            <a href="#sms-privacy">SMS Privacy Policy</a>.
+            I agree to receive recurring automated texts from Stellar Home Lighting
+            (TopWash Tallahassee LLC) about my quote, appointments, installation &amp;
+            customer care. Msg &amp; data rates may apply. Msg frequency varies.
+            Reply STOP to opt out, HELP for help. Consent is optional, not required to purchase.
+            <a href="/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a> &amp;
+            <a href="/terms-and-conditions" target="_blank" rel="noopener">Terms</a>.
           </span>
 
         </label>
@@ -209,6 +198,8 @@
           The checkbox is unchecked by default and is optional. If you leave it
           unchecked, you will not receive text messages, and your ability to
           request a quote or purchase services will not be affected.
+          Also see our <a href="#sms-terms">SMS Terms</a> and
+          <a href="#sms-privacy">SMS Privacy Policy</a> below.
         </p>
 
         <button class="button" id="submit" type="submit">Save My Preferences</button>
@@ -309,14 +300,13 @@
           phone: String(formData.get('phone') || '').trim(),
           email: String(formData.get('email') || '').trim(),
           sms_consent: consent,
-          // Kept so your existing backend fields still receive a value
           sms_transactional: consent,
           sms_marketing: false,
           lead_source: 'Stellar Home Lighting SMS Consent Page',
           service: 'Permanent Outdoor Lighting',
           page_url: window.location.href,
           submitted_at: new Date().toISOString(),
-          consent_text_version: '2026-11-26-v3'
+          consent_text_version: '2026-11-26-v4-short'
         };
 
         button.disabled = true;
