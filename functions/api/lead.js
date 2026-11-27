@@ -4,7 +4,9 @@
  * Cloudflare Pages Function
  * POST /api/lead
  *
- * Sends website leads to GoHighLevel.
+ * Handles:
+ * 1. Main website quote requests
+ * 2. Dedicated SMS consent submissions
  *
  * Cloudflare environment secret:
  * LEAD_WEBHOOK_URL or GHL_WEBHOOK_URL
@@ -36,6 +38,8 @@ const budgets = [
 
 export async function onRequestPost({ request, env }) {
   try {
+
+    // Get GoHighLevel webhook URL
     const url =
       env.LEAD_WEBHOOK_URL ||
       env.GHL_WEBHOOK_URL;
@@ -66,19 +70,18 @@ export async function onRequestPost({ request, env }) {
       }, 503);
     }
 
-    // Verify request content type
+    // Validate content type
     if (
       !(request.headers.get("content-type") || "")
         .includes("application/json")
     ) {
-      console.error("Invalid content type");
-
       return reply({
         ok: false,
         error: "JSON required."
       }, 415);
     }
 
+    // Request size limit
     const length = Number(
       request.headers.get("content-length") || 0
     );
@@ -106,8 +109,6 @@ export async function onRequestPost({ request, env }) {
     try {
       data = JSON.parse(body);
     } catch {
-      console.error("Invalid JSON body");
-
       return reply({
         ok: false,
         error: "Invalid JSON."
@@ -119,8 +120,6 @@ export async function onRequestPost({ request, env }) {
       typeof data !== "object" ||
       Array.isArray(data)
     ) {
-      console.error("Invalid JSON object");
-
       return reply({
         ok: false,
         error: "Invalid request."
@@ -131,6 +130,20 @@ export async function onRequestPost({ request, env }) {
     if (data.website) {
       return reply({ ok: true });
     }
+
+    /*
+     * IDENTIFY FORM TYPE
+     *
+     * Dedicated SMS consent form uses:
+     * lead_source =
+     * "Stellar Home Lighting SMS Consent Page"
+     *
+     * All other submissions are regular quote requests.
+     */
+
+    const isSmsConsentPage =
+      data.lead_source ===
+      "Stellar Home Lighting SMS Consent Page";
 
     // Customer name
     const fullName = str(
@@ -153,7 +166,6 @@ export async function onRequestPost({ request, env }) {
 
     // Phone number
     const phone = str(data.phone, 40);
-
     const digits = phone.replace(/\D/g, "");
 
     const normalizedPhone =
@@ -164,13 +176,25 @@ export async function onRequestPost({ request, env }) {
           ? `+${digits}`
           : "";
 
-    // Project information
+    // Customer information
     const address = str(data.address, 300);
     const budget = str(data.budget_range, 100);
     const email = str(data.email, 254);
 
-    // Detailed validation diagnostics.
-    // Only log field names, never personal data.
+    /*
+     * VALIDATION
+     *
+     * Both forms require:
+     * - First name
+     * - Valid US/Canada phone number
+     *
+     * Regular quote form additionally requires:
+     * - Address
+     * - Budget
+     *
+     * SMS consent page does not require those fields.
+     */
+
     const missingFields = [];
 
     if (!firstName) {
@@ -181,12 +205,17 @@ export async function onRequestPost({ request, env }) {
       missingFields.push("phone");
     }
 
-    if (!address) {
-      missingFields.push("address");
-    }
+    // Only quote forms require project information
+    if (!isSmsConsentPage) {
 
-    if (!budgets.includes(budget)) {
-      missingFields.push("budget_range");
+      if (!address) {
+        missingFields.push("address");
+      }
+
+      if (!budgets.includes(budget)) {
+        missingFields.push("budget_range");
+      }
+
     }
 
     if (missingFields.length > 0) {
@@ -197,7 +226,8 @@ export async function onRequestPost({ request, env }) {
 
       return reply({
         ok: false,
-        error: "Please check your form information."
+        error: "Please check your form information.",
+        fields: missingFields
       }, 400);
     }
 
@@ -206,17 +236,22 @@ export async function onRequestPost({ request, env }) {
       email &&
       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
     ) {
-      console.error(
-        "Lead validation failed: email"
-      );
-
       return reply({
         ok: false,
         error: "Invalid email."
       }, 400);
     }
 
-    // SMS consent must be explicitly true.
+    /*
+     * SMS CONSENT
+     *
+     * Only explicitly checked boxes count as consent.
+     *
+     * false / false is valid.
+     *
+     * Never automatically grant SMS consent.
+     */
+
     const smsTransactional =
       data.sms_transactional === true;
 
@@ -225,16 +260,20 @@ export async function onRequestPost({ request, env }) {
 
     const now = new Date().toISOString();
 
-    // Record consent timestamps only
-    // when the respective checkbox was selected.
     const transactionalConsentAt =
       smsTransactional ? now : null;
 
     const marketingConsentAt =
       smsMarketing ? now : null;
 
-    // Discount is pending verification.
+    /*
+     * DISCOUNT
+     *
+     * Applies only to regular quote submissions.
+     */
+
     const discountRequested =
+      !isSmsConsentPage &&
       data.discount_percent === 10 &&
       data.discount_offer === "10% timed offer";
 
@@ -244,8 +283,12 @@ export async function onRequestPost({ request, env }) {
       100
     );
 
-    // Build GoHighLevel payload
+    /*
+     * BUILD GOHIGHLEVEL PAYLOAD
+     */
+
     const lead = {
+
       first_name: firstName,
       last_name: lastName,
 
@@ -259,8 +302,9 @@ export async function onRequestPost({ request, env }) {
 
       phone: normalizedPhone,
       email: email,
-      address: address,
 
+      // Project information
+      address: address,
       budget_range: budget,
 
       home_coverage: str(
@@ -276,9 +320,16 @@ export async function onRequestPost({ request, env }) {
         str(data.lead_source, 100) ||
         "Stellar Home Lighting Website",
 
+      form_type: isSmsConsentPage
+        ? "SMS Consent"
+        : "Quote Request",
+
       state_market: "Florida",
 
-      // Separate SMS permissions
+      /*
+       * INDEPENDENT SMS PERMISSIONS
+       */
+
       sms_transactional: smsTransactional,
       sms_marketing: smsMarketing,
 
@@ -295,7 +346,13 @@ export async function onRequestPost({ request, env }) {
           1000
         ),
 
-      // Promotional discount
+      consent_text_version:
+        str(data.consent_text_version, 50),
+
+      /*
+       * PROMOTIONAL DISCOUNT
+       */
+
       discount_requested: discountRequested,
 
       discount_percent_requested:
@@ -307,10 +364,15 @@ export async function onRequestPost({ request, env }) {
           : "Not requested",
 
       page_url: str(data.page_url, 1000),
+
       submitted_at: now
+
     };
 
-    // Send lead to GoHighLevel
+    /*
+     * FORWARD TO GOHIGHLEVEL
+     */
+
     const controller = new AbortController();
 
     const timeout = setTimeout(
@@ -321,7 +383,9 @@ export async function onRequestPost({ request, env }) {
     let response;
 
     try {
+
       response = await fetch(webhook.toString(), {
+
         method: "POST",
 
         headers: {
@@ -331,13 +395,17 @@ export async function onRequestPost({ request, env }) {
         body: JSON.stringify(lead),
 
         signal: controller.signal,
+
         redirect: "error"
+
       });
+
     } finally {
       clearTimeout(timeout);
     }
 
     if (!response.ok) {
+
       console.error(
         "GHL webhook failed with HTTP status:",
         response.status
@@ -345,19 +413,30 @@ export async function onRequestPost({ request, env }) {
 
       return reply({
         ok: false,
-        error: "Unable to submit quote."
+        error: "Unable to submit information."
       }, 502);
+
     }
 
-    console.log("Lead forwarded to GHL webhook");
+    console.log(
+      isSmsConsentPage
+        ? "SMS preference submission forwarded to GHL"
+        : "Quote request forwarded to GHL"
+    );
+
+    /*
+     * SUCCESS
+     */
 
     return reply({
       ok: true,
       success: true,
+      form_type: lead.form_type,
       discount_status: lead.discount_status
     });
 
   } catch (e) {
+
     console.error(
       "Lead request failed:",
       e?.name || "UnknownError"
@@ -367,8 +446,13 @@ export async function onRequestPost({ request, env }) {
       ok: false,
       error: "Unable to process request."
     }, 500);
+
   }
 }
+
+/*
+ * GET requests are not supported.
+ */
 
 export function onRequestGet() {
   return reply({
